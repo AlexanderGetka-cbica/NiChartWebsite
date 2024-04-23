@@ -41,11 +41,18 @@ const Contact = () => {
         </div>
         <div className={styles.contactContainer}>
           <Paper className={styles.contactForm}>
-            <form onSubmit={handleSubmit}>
-              <TextField label="Name" name="name" variant="outlined" fullWidth margin="normal" />
-              <TextField label="Email" name="email" variant="outlined" fullWidth margin="normal" />
+            {/* <form onSubmit={handleSubmit}> */}
+            {/* Replace formsubmit with something more stable. 250 messages per month are free. */}
+            <form action="https://formsubmit.co/7631f70684d871a83d4190ccd67c01dc"  method="POST">
+              <TextField label="Name" name="name" variant="outlined" fullWidth margin="normal"/>
+              <TextField label="Email" name="email" variant="outlined" fullWidth margin="normal" type='email' required/>
               <TextField label="Subject" name="subject" variant="outlined" fullWidth margin="normal" />
               <TextField label="Message" name="message" variant="outlined" fullWidth multiline rows={5} margin="normal" />
+              <input type="hidden" name="_next" value="https://neuroimagingchart.com/contact/"/>
+              <input type="hidden" name="_subject" value="New Contact form submission!"/>
+              <input type="hidden" name="_autoresponse" value="Thank you for your message!"/>
+              <input type="hidden" name="_template" value="table"/>
+              <input type="hidden" name="_cc" value="nichart.aibil@gmail.com"/>
               <Button type="submit" variant="contained" color="primary">Send</Button>
             </form>
           </Paper>
@@ -53,7 +60,7 @@ const Contact = () => {
             <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3058.6297914270904!2d-75.20029352253465!3d39.949669871518395!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c6c72677dd280d%3A0x7888b382a71d5f44!2sRichards%20Medical%20Research%20Laboratories!5e0!3m2!1sen!2sus!4v1689101746189!5m2!1sen!2sus" 
                     width="100%" 
                     height="100%" 
-                    style={{ border: "solid", "min-height": "500px"}} 
+                    style={{ border: "solid", "minHeight": "500px"}} 
                     allow="fullscreen"
                     loading="lazy">
             </iframe>
