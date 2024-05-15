@@ -192,6 +192,7 @@ export async function getCombinedImageZip(doBrowserDownload) {
 
 export async function downloadOutputFile(key, doBrowserDownload) {
   if (fileCache[key]) {
+    console.log("File: ", {key}, " was already fetched")
     return fileCache[key];
   }
 
@@ -213,6 +214,7 @@ export async function downloadOutputFile(key, doBrowserDownload) {
 
 export async function downloadInputFile(key, doBrowserDownload) {
   if (fileCache[key]) {
+    console.log("File: ", {key}, " was already fetched")
     return fileCache[key];
   }
 
