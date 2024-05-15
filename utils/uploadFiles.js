@@ -21,6 +21,7 @@ import { getProperties, uploadData } from '@aws-amplify/storage'
 Amplify.configure(awsconfig)
 Auth.configure(awsconfig)
 Storage.configure(awsconfig)
+const fileCache = {};
 
 export async function uploadFileMultipart(bucket, filename, blob, uploadProgressCallback, uploadCompleteCallback, uploadErrorCallback) {
   console.log("uploadFiles: Initiating multipart upload")
@@ -189,23 +190,48 @@ export async function getCombinedImageZip(doBrowserDownload) {
 
 }
 
-async function downloadOutputFile(key, doBrowserDownload) {
-      // Log config for download
-      console.log("downloadOutputFile")
-      console.log("Key: " + key);
-      console.log(awsconfig)
-      try {
-        const result = await Storage.get(key, {bucket:'cbica-nichart-outputdata', download:true, level:'private'})
-        if (doBrowserDownload) {
-            downloadBlob(result.Body, key);
-        }
-        return result.Body
-      }
-      catch (error) {
-          console.log("Error during file download: ", error);
-      }
-      
+export async function downloadOutputFile(key, doBrowserDownload) {
+  if (fileCache[key]) {
+    return fileCache[key];
   }
+
+  console.log("downloadOutputFile");
+  console.log("Key: " + key);
+  console.log(awsconfig);
+
+  try {
+    const result = await Storage.get(key, { bucket: 'cbica-nichart-outputdata', download: true, level: 'private' });
+    if (doBrowserDownload) {
+      downloadBlob(result.Body, key);
+    }
+    fileCache[key] = result.Body;
+    return result.Body;
+  } catch (error) {
+    console.log("Error during file download: ", error);
+  }
+}
+
+export async function downloadInputFile(key, doBrowserDownload) {
+  if (fileCache[key]) {
+    return fileCache[key];
+  }
+
+  console.log("downloadInputFile");
+  console.log("Key: " + key);
+  console.log(awsconfig);
+
+  try {
+    const result = await Storage.get(key, { bucket: 'cbica-nichart-inputdata', download: true, level: 'private' });
+    if (doBrowserDownload) {
+      downloadBlob(result.Body, key);
+    }
+    fileCache[key] = result.Body;
+    return result.Body;
+  } catch (error) {
+    console.log("Error during file download: ", error);
+  }
+}
+
 
 export function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
