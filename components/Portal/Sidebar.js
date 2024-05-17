@@ -7,6 +7,12 @@ function Sidebar({ handleModuleSelection }) {
     <div className={styles.sidebar}>
       <h3 className={styles['sidebar-heading']}>Modules</h3>
       <div className={styles['sidebar-buttons']}>
+      <button onClick={() => handleModuleSelection('modulereadme')} className={styles['sidebar-button']}>
+          NiChart Cloud Info
+        </button>
+        <button onClick={() => handleModuleSelection('module0')} className={styles['sidebar-button']}>
+          Module 0: Data Management
+        </button>
         <button onClick={() => handleModuleSelection('module1')} className={styles['sidebar-button']}>
           Module 1: Image Processing
         </button>

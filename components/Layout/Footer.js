@@ -9,7 +9,7 @@ const Footer = () => {
     <footer className={styles.footer}>
       <div className={styles.footerContent}>
         <p>
-          © 2023{' '}
+          © 2024{' '}
           <a href="https://www.med.upenn.edu/cbica/" target="_blank" rel="noopener noreferrer" className={styles.cbicaLink}>
             Center for Biomedical Image Computing and Analytics (CBICA), University of Pennsylvania
           </a>

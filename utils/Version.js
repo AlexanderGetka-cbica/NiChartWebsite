@@ -1,3 +1,3 @@
-const VERSION = '1.0.0'; // TODO: auto increment
-const LASTUPDATED = "December 13th, 2023"
+const VERSION = '1.0.3'; // TODO: auto increment
+const LASTUPDATED = "May 16th, 2024"
 export {VERSION, LASTUPDATED};

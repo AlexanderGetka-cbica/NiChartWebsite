@@ -6,7 +6,7 @@ import { ResponsiveButton as Button } from '../Components/ResponsiveButton.js'
 // This widget uses the user's Cognito credentials to list that user's bucket contents for a given bucket.
 // It also provides functionality to individually delete/remove those contents.
 
-export const RemoteFileDisplay = ({bucket}) =>  {
+export const RemoteFileDisplay = ({bucket, prefix=""}) =>  {
     
     let [remoteFiles, setRemoteFiles] = useState({});
     let [justCreated, setJustCreated] = useState(true);

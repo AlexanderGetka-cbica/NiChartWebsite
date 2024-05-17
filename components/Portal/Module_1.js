@@ -7,6 +7,7 @@ import { RemoteFileDisplay } from './RemoteFileDisplay.js'
 import { ResponsiveButton as Button } from '../Components/ResponsiveButton.js'
 import Modal from '../Components/Modal'
 import { DragAndDropUploader, TestUpload } from './DragAndDropUploader.js';
+import { ModelSelectionMenu } from './ModelSelectionMenu.js'
 
 
 async function exportModule1Results(moduleSelector) {
@@ -40,6 +41,11 @@ function Module_1({moduleSelector}) {
 
   const handleFileBrowserOpen = () => setFileBrowserModalOpen(true);
   const handleFileBrowserClose = () => setFileBrowserModalOpen(false);
+
+    // Modal dialog stuff for model selection
+    const [modelSelectionModalOpen, setModelSelectionModalOpen] = useState(false);
+    const handleModelSelectionOpen = () => setModelSelectionModalOpen(true);
+    const handleModelSelectionClose = () => setModelSelectionModalOpen(false);
   
   async function submitJobs () {
     if (!userReceivedWarning) {
@@ -57,6 +63,15 @@ function Module_1({moduleSelector}) {
   return (
     <div>
       
+      <Modal
+                    open={modelSelectionModalOpen}
+                    handleClose={handleModelSelectionClose}
+                    title="Select image processing models"
+                    content="Check any number of models to use for image feature extraction. This list will be expanded as we release new models."
+                >
+                    <ModelSelectionMenu category="module1" />
+    </Modal>
+
       <Modal
             open={fileBrowserModalOpen}
             handleClose={handleFileBrowserClose}
@@ -77,6 +92,7 @@ function Module_1({moduleSelector}) {
               <DefaultStorageManagerExample/>
               {/*<DragAndDropUploader />*/}
               <Button variation="primary" colorTheme="info" onClick={handleFileBrowserOpen}>Browse Uploads + Check QC</Button>
+              <Button variation="primary" colorTheme="info" onClick={handleModelSelectionOpen}>Select Models</Button>
               <Button variation="primary" loadingText="Submitting..." onClick={async () => submitJobs()} >Submit Jobs</Button> 
               <Button variation="destructive" loadingText="Emptying..." onClick={async () => emptyBucketForUser('cbica-nichart-inputdata')}>Remove All Data</Button>
               <p>Drag and drop NIfTI-format (.nii, .nii.gz) T1 MRI brain scans only, or .zip archives containing them. Please be aware that filenames with characters other than alphanumerics, hyphens or underscores will be changed automatically.</p>       

@@ -1,10 +1,39 @@
 
+let module_0_cache = {};
+
+let models_cache = {module1: {}, module2: {}};
+
 let module_1_cache = {};
 let module_2_cache = {}; 
 let module_3_cache = {};
 
 let use_cached_module1_results = false;
 let use_cached_module2_results = false;
+
+export function modelsAreCached(category) {
+    if (models_cache.category) {
+        return true;
+    } else {
+        return false;
+    }
+
+}
+
+export function getModelsCache(category) {
+    return models_cache[category];
+}
+
+export function setModelsCache(category, contents) {
+    models_cache[category] = contents; 
+}
+
+export function getModule0Cohorts() {
+    return module_0_cache;
+}
+
+export function setModule0Cohorts(cohorts_object) {
+    module_0_cache = cohorts_object;
+}
 
 export function getUseModule1Results() {
     return use_cached_module1_results;

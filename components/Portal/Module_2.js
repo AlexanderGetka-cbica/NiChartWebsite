@@ -20,6 +20,44 @@ async function exportModule2Results(moduleSelector) {
     moduleSelector("module3");
 }
 
+export async function downloadTemplateDemographics() {
+  const referenceFilePath = '/content/Portal/Module2/TemplateDemographicsCSV.csv'
+  try {
+      const response = await fetch(referenceFilePath);
+      if (response.status === 404) {
+          console.error('Error loading template CSV:', response.statusText);
+          alert("We couldn't download the template CSV. Please submit a bug report.")
+          return;
+      }
+      const content = await response.text();
+      //referenceData = Papa.parse(content, { header: true }).data;
+      
+      const fileName = "Template-Demographics-CSV.csv";
+      const fileType = "text/csv";
+      const blob = new Blob([content], { type: fileType });
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName || 'download';
+      const clickHandler = () => {
+          setTimeout(() => {
+          URL.revokeObjectURL(url);
+          a.removeEventListener('click', clickHandler);
+          }, 150);
+      };
+      a.addEventListener('click', clickHandler, false);
+      a.click();
+      
+  } catch (error) {
+      console.error('Error loading template CSV:', error);
+      alert("We couldn't download the template CSV. Please check your connection or submit a bug report.")
+      return;
+  }
+
+
+}
+
 function Module_2({moduleSelector}) {
   const [useModule1Cache, setUseModule1Cache] = useState(getUseModule1Results());
   
@@ -47,43 +85,7 @@ function Module_2({moduleSelector}) {
 
   }
   
-  async function downloadTemplateDemographics() {
-    const referenceFilePath = '/content/Portal/Module2/TemplateDemographicsCSV.csv'
-    try {
-        const response = await fetch(referenceFilePath);
-        if (response.status === 404) {
-            console.error('Error loading template CSV:', response.statusText);
-            alert("We couldn't download the template CSV. Please submit a bug report.")
-            return;
-        }
-        const content = await response.text();
-        //referenceData = Papa.parse(content, { header: true }).data;
-        
-        const fileName = "Template-Demographics-CSV.csv";
-        const fileType = "text/csv";
-        const blob = new Blob([content], { type: fileType });
-        
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName || 'download';
-        const clickHandler = () => {
-            setTimeout(() => {
-            URL.revokeObjectURL(url);
-            a.removeEventListener('click', clickHandler);
-            }, 150);
-        };
-        a.addEventListener('click', clickHandler, false);
-        a.click();
-        
-    } catch (error) {
-        console.error('Error loading template CSV:', error);
-        alert("We couldn't download the template CSV. Please check your connection or submit a bug report.")
-        return;
-    }
 
-
-  }
     
   return (
     <div>

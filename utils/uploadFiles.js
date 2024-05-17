@@ -735,16 +735,17 @@ export async function getKeyMetadata(bucket, key) {
   }
 }
 
-export async function runModule1Jobs() {
+export async function runModule1Jobs(prefix="") {
     console.log("runModule1Jobs")
     const credentials = await Auth.currentCredentials();
     const client = new LambdaClient({
           credentials: Auth.essentialCredentials(credentials),
           region: 'us-east-1',
        });
+    const payload_in = {prefix: prefix};
     const command = new InvokeCommand({
          FunctionName: 'cbica-nichart-helloworld-jobprocessor',
-         //Payload: JSON.stringify(payload),
+         Payload: JSON.stringify(payload_in),
          LogType: LogType.Tail,
        });
   const { Payload, LogResult } = await client.send(command);
@@ -849,6 +850,13 @@ export const SpareScoresInputStorageManager = () => {
       maxFileCount={1}
       shouldAutoProceed={false}
       processFile={processFileForSpareScoresInput}
+      displayText={{
+        dropFilesText: "Drag and drop module 1 output here",
+        browseFilesText: "Or browse individual files",
+        getFilesUploadedText(count) {
+          return '${count} '
+        }
+      }}
       //onSuccess={onSuccess}
       onFileRemove={({ key }) => {
           setFiles((prevFiles) => {
@@ -912,6 +920,13 @@ export const SpareScoresDemographicStorageManager = () => {
       accessLevel="private"
       maxFileCount={1}
       shouldAutoProceed={false}
+      displayText={{
+        dropFilesText: "Drag and drop Demographics CSV here",
+        browseFilesText: "Or browse individual files",
+        getFilesUploadedText(count) {
+          return '${count} '
+        }
+      }}
       processFile={processFileForSpareScoresDemographics}
       //onSuccess={onSuccess}
       onFileRemove={({ key }) => {
