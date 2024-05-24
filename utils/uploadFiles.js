@@ -23,6 +23,32 @@ Auth.configure(awsconfig)
 Storage.configure(awsconfig)
 const fileCache = {};
 
+export async function collectCohortsFromRemoteStorage(bucket) {
+  try {
+    const listedObjects = await listBucketContentsForUser(bucket, '');
+    console.log("listedObjects")
+    console.log(listedObjects)
+    if (listedObjects.length === 0) return [];
+    return listedObjects;
+  } catch (error) {
+    console.log("Error caught in collectCohortsFromRemoteStorage:", error)
+    return false
+  }
+}
+
+export async function createCohort(cohort) {
+  const resp = await createEmptySubdirectory('cbica-nichart-inputdata', cohort)
+  return resp;
+}
+
+export async function createEmptySubdirectory(bucket, subdirname) {
+  const credentials = await Auth.currentCredentials();
+  let path = '';
+  if (subdirname.endsWith('/')) { path = path + subdirname } else { path = path + subdirname + '/' };
+  const response = await Storage.put(path, null, {'bucket': bucket, 'level': 'private'})
+  return response;
+}
+
 export async function uploadFileMultipart(bucket, filename, blob, uploadProgressCallback, uploadCompleteCallback, uploadErrorCallback) {
   console.log("uploadFiles: Initiating multipart upload")
   // signature of onProgress: (progress)
@@ -257,6 +283,44 @@ export async function uploadToModule2(file) {
     const credentials = await Auth.currentCredentials();
     const key = "sparescores/input.csv"
     const result = await Storage.put(key, file, {'bucket': 'cbica-nichart-inputdata', 'level': 'private', 'metadata': {'uploadedByUser': credentials.identityId, 'uploadedByUsername': username}})
+}
+
+export async function downloadTemplateDemographics() {
+  const referenceFilePath = '/content/Portal/Module2/TemplateDemographicsCSV.csv'
+  try {
+      const response = await fetch(referenceFilePath);
+      if (response.status === 404) {
+          console.error('Error loading template CSV:', response.statusText);
+          alert("We couldn't download the template CSV. Please submit a bug report.")
+          return;
+      }
+      const content = await response.text();
+      //referenceData = Papa.parse(content, { header: true }).data;
+      
+      const fileName = "Template-Demographics-CSV.csv";
+      const fileType = "text/csv";
+      const blob = new Blob([content], { type: fileType });
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName || 'download';
+      const clickHandler = () => {
+          setTimeout(() => {
+          URL.revokeObjectURL(url);
+          a.removeEventListener('click', clickHandler);
+          }, 150);
+      };
+      a.addEventListener('click', clickHandler, false);
+      a.click();
+      
+  } catch (error) {
+      console.error('Error loading template CSV:', error);
+      alert("We couldn't download the template CSV. Please check your connection or submit a bug report.")
+      return;
+  }
+
+
 }
 
 
@@ -688,9 +752,9 @@ export async function emptyBucketForUser(bucket, prefix='') {
 
 }
 
-export async function listBucketContentsForUser(bucket) {
+export async function listBucketContentsForUser(bucket, prefix='') {
     try {
-      const listedObjects = await Storage.list('', {'bucket': bucket,'level': 'private', 'pageSize': 'ALL'});
+      const listedObjects = await Storage.list(prefix, {'bucket': bucket,'level': 'private', 'pageSize': 'ALL'});
       //console.log("listedObjects")
       //console.log(listedObjects)
       if (listedObjects.results.length === 0) return [];
@@ -760,14 +824,14 @@ export async function runModule1Jobs(prefix="") {
   return result.replaceAll('"', '');
 }
 
-export async function resubmitModule1Jobs() {
+export async function resubmitModule1Jobs(prefix="") {
     console.log("runModule1Jobs")
     const credentials = await Auth.currentCredentials();
     const client = new LambdaClient({
           credentials: Auth.essentialCredentials(credentials),
           region: 'us-east-1',
        });
-    const payload = { 'only_resubmit': "True" }
+    const payload = { 'only_resubmit': "True", 'prefix': prefix }
     const command = new InvokeCommand({
          FunctionName: 'cbica-nichart-helloworld-jobprocessor',
          Payload: JSON.stringify(payload),
@@ -839,7 +903,7 @@ const processFileForSpareScoresDemographics = async ({ file }) => {
     };
 }
 
-export const SpareScoresInputStorageManager = () => {
+export const SpareScoresInputStorageManager = ({prefix=''}) => {
   let [files, setFiles] = React.useState({});
   
   return (
@@ -847,6 +911,7 @@ export const SpareScoresInputStorageManager = () => {
     <StorageManager
       acceptedFileTypes={['.csv']}
       accessLevel="private"
+      path={prefix+"/"}
       maxFileCount={1}
       shouldAutoProceed={false}
       processFile={processFileForSpareScoresInput}
@@ -910,7 +975,7 @@ export const SpareScoresInputStorageManager = () => {
   );
 };
 
-export const SpareScoresDemographicStorageManager = () => {
+export const SpareScoresDemographicStorageManager = ({prefix=''}) => {
   let [files, setFiles] = React.useState({});
   
   return (
@@ -918,6 +983,7 @@ export const SpareScoresDemographicStorageManager = () => {
     <StorageManager
       acceptedFileTypes={['.csv']}
       accessLevel="private"
+      path={prefix+"/"}
       maxFileCount={1}
       shouldAutoProceed={false}
       displayText={{
@@ -981,16 +1047,17 @@ export const SpareScoresDemographicStorageManager = () => {
   );
 };
 
-export async function launchSpareScores() {
+export async function launchSpareScores(prefix='') {
     console.log("launchSpareScores")
     const credentials = await Auth.currentCredentials();
     const client = new LambdaClient({
           credentials: Auth.essentialCredentials(credentials),
           region: 'us-east-1',
        });
+    const payload_in = {'prefix': prefix}
     const command = new InvokeCommand({
          FunctionName: 'cbica-nichart-sparescores-jobprocessor',
-         //Payload: JSON.stringify(payload),
+         Payload: JSON.stringify(payload),
          LogType: LogType.Tail,
        });
   const { Payload, LogResult } = await client.send(command);
@@ -1001,11 +1068,20 @@ export async function launchSpareScores() {
   return result.replaceAll('"', '');
 }
 
-export async function getSpareScoresOutput(doBrowserDownload) {
+export async function getSpareScoresOutput(doBrowserDownload, prefix='') {
     try {
-        let resp = await downloadOutputFile("sparescores/output.csv", doBrowserDownload);
+      let file_key = "";
+        if (prefix) {
+          file_key = prefix + "/" + "sparescores/output.csv";
+          output_key = prefix + "_" + "sparescores_output.csv"
+        } else {
+          file_key = "sparescores/output.csv"
+          output_key = "sparescores_output.csv"
+        }
+        
+        let resp = await downloadOutputFile(file_key, doBrowserDownload);
         if (getUseModule2Results()) {
-            const file = new File([resp], "sparescores_output.csv", {type: 'text/csv'})
+            const file = new File([resp], output_key, {type: 'text/csv'})
             setModule2Cache({'csv': file})
         }
     } catch (e) {

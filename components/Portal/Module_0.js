@@ -11,6 +11,7 @@ import { setModule0Cohorts, getModule0Cohorts } from '../../utils/NiChartPortalC
 import { CohortListing } from './CohortListing.js'
 import { SpareScoresInputStorageManager, SpareScoresDemographicStorageManager, getSpareScoresOutput, emptyBucketForUser,  downloadBlob } from '../../utils/uploadFiles.js'
 import { downloadTemplateDemographics } from './Module_2.js'
+import { createCohort } from '../../utils/uploadFiles.js'
 
 // Concept: User creates cohorts/datsets, uploads the corresponding files.
 // These files are placed in subdirectories corresponding 
@@ -36,14 +37,25 @@ function Module_0({moduleSelector}) {
     const handleFileBrowserClose = () => setFileBrowserModalOpen(false);
       
     const [cohorts, setCohorts] = useState(getModule0Cohorts());
-    const [selectedCohort, setSelectedCohort] = useState(null);
+    const [selectedCohort, setSelectedCohort] = useState("");
 
     const handleNewCohortSelected = (cohort) => {
         setSelectedCohort(cohort);
     }
 
     const handleCohortsUpdated = (cohorts) => {
+        setCohorts(cohorts);
         saveCohorts(cohorts);
+    }
+
+    const removeCohort = (cohort) => {
+        if (cohort in cohorts) {
+            const tmp = cohorts;
+            delete tmp[cohort];
+            handleCohortsUpdated(tmp);
+            
+        } else {alert("Cohort doesn't exist.")}
+        setSelectedCohort("");
     }
 
     function saveCohorts(arg) {
@@ -52,8 +64,8 @@ function Module_0({moduleSelector}) {
     }
 
     function clearCohorts() {
-        setModule0Cohorts([]);
-        setCohorts([]);
+        setModule0Cohorts({});
+        setCohorts({});
     }
 
     return (
@@ -87,10 +99,10 @@ function Module_0({moduleSelector}) {
                 <Flex justifyContent="flex-start" direction="column" width="50%">
                 <Heading level={3}>Manage Cohorts</Heading>
                 <Text>Click to select a cohort and upload both scans and demographics CSV to the right. (You can use the "download CSV template" button to see a valid example). When you see both checkmarks, your cohort is ready for processing.</Text>
-                <CohortListing updateSelection={handleNewCohortSelected} updateCohorts={handleCohortsUpdated} />
+                <CohortListing emitNewSelection={(cohort) => handleNewCohortSelected(cohort)} emitCohorts={(cohorts) => handleCohortsUpdated(cohorts)} allowCreation={true}/>
                 <Divider orientation='horizontal' />
                     <Heading level={3}>Clear Data</Heading>
-                    <Text>You can immediately delete any uploaded data from our servers by using these buttons. Otherwise, your data will remain in our cloud storage for a maximum of 36 hours.</Text>
+                    <Text>You can immediately delete any uploaded data from our servers by using these buttons. <b>This is a destructive action</b>. Otherwise, your data will remain in our cloud storage for a maximum of 36 hours.</Text>
                     <Button variation="destructive" loadingText="Emptying..." onClick={async () => emptyBucketForUser('cbica-nichart-inputdata')}>Delete All Input Data</Button>
                 <   Button loadingText="Emptying..." variation="destructive" onClick={async () => emptyBucketForUser('cbica-nichart-outputdata') }>Delete All Output Data</Button>
                 </Flex>
@@ -105,19 +117,21 @@ function Module_0({moduleSelector}) {
                     wrap="nowrap"
                 >
                 {([key, item], index) => (
-                    <div hidden={item != selectedCohort}>
+                    <>
+                    <div hidden={key != selectedCohort}>
                     <Flex direction={{ base: 'column' }} width="100%" justifyContent="flex-start">
-                    <Heading level={3}>Selected cohort: {item}</Heading>
+                    <Heading level={3}>Selected cohort: {key}</Heading>
                     <Heading level={5}>Upload Input T1 Scans</Heading>
-                    <DefaultStorageManagerExample prefix={item}/>
+                    <DefaultStorageManagerExample prefix={key}/>
                     <Button variation="primary" colorTheme="info" onClick={handleFileBrowserOpen}>Browse Uploads + Check QC</Button> 
                     {/*<DragAndDropUploader prefix={item} />*/}
                     <Heading level={5}>Upload Demographics CSV</Heading>
-                    <SpareScoresDemographicStorageManager prefix={item}></SpareScoresDemographicStorageManager>
+                    <SpareScoresDemographicStorageManager prefix={key}></SpareScoresDemographicStorageManager>
                     <Button loadingText="Downloading..." variation="primary" colorTheme="info" onClick={async () => downloadTemplateDemographics() }>Download Template CSV</Button>
-                    <Button variation="destructive" loadingText="Emptying..." onClick={async () => emptyBucketForUser('cbica-nichart-inputdata')}>Delete Cohort</Button>
+                    <Button variation="destructive" loadingText="Emptying..." onClick={async () => { emptyBucketForUser('cbica-nichart-inputdata', key); removeCohort(key); alert("Cohort data deleted.") }}>Delete Cohort</Button>
                     </Flex>
                     </div> 
+                    </>
                     )}
                 </Collection>
 

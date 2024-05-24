@@ -6,6 +6,7 @@ import styles from '../../styles/Portal_Module_2.module.css'
 import { ResponsiveButton as Button } from '../Components/ResponsiveButton.js'
 import Modal from '../Components/Modal';
 import { ModelSelectionMenu } from './ModelSelectionMenu.js'
+import { downloadTemplateDemographics } from '../../utils/uploadFiles.js';
 
 async function exportModule2Results(moduleSelector) {
     // Perform the caching transfer operation
@@ -20,43 +21,7 @@ async function exportModule2Results(moduleSelector) {
     moduleSelector("module3");
 }
 
-export async function downloadTemplateDemographics() {
-  const referenceFilePath = '/content/Portal/Module2/TemplateDemographicsCSV.csv'
-  try {
-      const response = await fetch(referenceFilePath);
-      if (response.status === 404) {
-          console.error('Error loading template CSV:', response.statusText);
-          alert("We couldn't download the template CSV. Please submit a bug report.")
-          return;
-      }
-      const content = await response.text();
-      //referenceData = Papa.parse(content, { header: true }).data;
-      
-      const fileName = "Template-Demographics-CSV.csv";
-      const fileType = "text/csv";
-      const blob = new Blob([content], { type: fileType });
-      
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName || 'download';
-      const clickHandler = () => {
-          setTimeout(() => {
-          URL.revokeObjectURL(url);
-          a.removeEventListener('click', clickHandler);
-          }, 150);
-      };
-      a.addEventListener('click', clickHandler, false);
-      a.click();
-      
-  } catch (error) {
-      console.error('Error loading template CSV:', error);
-      alert("We couldn't download the template CSV. Please check your connection or submit a bug report.")
-      return;
-  }
 
-
-}
 
 function Module_2({moduleSelector}) {
   const [useModule1Cache, setUseModule1Cache] = useState(getUseModule1Results());
@@ -111,7 +76,7 @@ function Module_2({moduleSelector}) {
                     title="Select SPARE models"
                     content="Check any number of models to use during SPARE score generation. This list will be expanded as we release new models."
                 >
-                    <ModelSelectionMenu />
+                    <ModelSelectionMenu category="module2" />
                 </Modal>
                 <Button loadingText="Submitting..." variation="primary" onClick={async () => launchSpareScores() } >Generate SPARE scores</Button>
                 <Button loadingText="Downloading..." variation="primary" colorTheme="info" onClick={async () => downloadTemplateDemographics() }>Download Template</Button>

@@ -8,7 +8,8 @@ import { ResponsiveButton as Button } from '../Components/ResponsiveButton.js'
 import Modal from '../Components/Modal'
 import { DragAndDropUploader, TestUpload } from './DragAndDropUploader.js';
 import { ModelSelectionMenu } from './ModelSelectionMenu.js'
-
+import { getModule0SelectedCohort, setModule0SelectedCohort, getModule0Cohorts, setModule0Cohorts } from '../../utils/NiChartPortalCache.js'
+import { CohortListing } from '../Portal/CohortListing.js'
 
 async function exportModule1Results(moduleSelector) {
     // Perform the caching transfer operation
@@ -42,10 +43,16 @@ function Module_1({moduleSelector}) {
   const handleFileBrowserOpen = () => setFileBrowserModalOpen(true);
   const handleFileBrowserClose = () => setFileBrowserModalOpen(false);
 
+  const handleNewCohortSelected = (selected) => setSelectedCohort(selected);
+  const handleCohortsUpdated = (cohorts) => setCohorts(cohorts);
+
     // Modal dialog stuff for model selection
     const [modelSelectionModalOpen, setModelSelectionModalOpen] = useState(false);
     const handleModelSelectionOpen = () => setModelSelectionModalOpen(true);
     const handleModelSelectionClose = () => setModelSelectionModalOpen(false);
+
+    const [selectedCohort, setSelectedCohort] = useState(getModule0SelectedCohort());
+    const [cohorts, setCohorts] = useState(getModule0Cohorts());
   
   async function submitJobs () {
     if (!userReceivedWarning) {
@@ -57,7 +64,7 @@ function Module_1({moduleSelector}) {
             return;
         }
     }
-        await runModule1Jobs();
+        await runModule1Jobs(prefix);
     }
     
   return (
@@ -78,14 +85,23 @@ function Module_1({moduleSelector}) {
             title="Uploads and Quality Control"
             content="Files you have uploaded are visible here. You can also see some basic status information (including initial QC results) and delete files from the server if desired."
       >
-         <RemoteFileDisplay bucket="cbica-nichart-inputdata" height="75%" />
+         <RemoteFileDisplay bucket="cbica-nichart-inputdata" prefix={selectedCohort} height="75%" />
       </Modal>
       
 
       <Heading level={1}>Module 1: Image Processing</Heading>
+      <p>Select a cohort, select an image processing model to extract features, then click "submit jobs" to start. When done, export your results to module 2 or download them directly.</p>
       <div className={styles.moduleContainer}>
           <Divider orientation="horizontal" />
           <Flex direction={{ base: 'column', large: 'row' }} maxWidth="100%" padding="1rem" width="100%" justifyContent="flex-start">
+              <Flex justifyContent="flex-start" direction="column" width="33%">
+                    <Heading level={3}>Select Cohort</Heading>
+                    <CohortListing emitNewSelection={(cohort) => handleNewCohortSelected(cohort)} emitCohorts={(cohorts) => handleCohortsUpdated(cohorts)} allowCreation={false}/>
+                    <Button variation="primary" colorTheme="info" onClick={handleFileBrowserOpen}>Browse Uploads + Check QC</Button>
+                <Button variation="primary" colorTheme="info" onClick={handleModelSelectionOpen}>Select Models</Button>
+                <Button variation="primary" loadingText="Submitting..." onClick={async () => submitJobs()} >Submit Jobs</Button> 
+            </Flex>
+              
               <Flex justifyContent="space-between" direction="column" width="33%">
                 
               <Heading level={3}>Upload Input T1 Scans</Heading>

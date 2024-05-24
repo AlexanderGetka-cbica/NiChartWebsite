@@ -7,6 +7,10 @@ const nextConfig = {
   trailingSlash: true,
   // Optional: Change the output directory `out` -> `dist`
   distDir: 'dist',
+  webpack(config) {
+    config.experiments = {...config.experiments, topLevelAwait: true}
+    return config;
+  }
 }
  
 module.exports = nextConfig

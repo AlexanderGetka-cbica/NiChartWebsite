@@ -16,7 +16,7 @@ export const RemoteFileDisplay = ({bucket, prefix=""}) =>  {
     
     async function update() {
       console.log("Updating RemoteFileDisplay")
-      var out_list = await listBucketContentsForUser(bucket)
+      var out_list = await listBucketContentsForUser(bucket, prefix)
       if (!out_list) {
         alert ("We couldn't find anything to browse in your bucket. If this is in error, please contact nichart-devs@cbica.upenn.edu.")
       }

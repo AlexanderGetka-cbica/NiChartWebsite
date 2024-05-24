@@ -1,9 +1,14 @@
 import React, { useState } from "react";
 
-export const ModelSelectionMenu = props => {
+export const ModelSelectionMenu = ({category}) => {
   // State with list of all checked item
   const [checked, setChecked] = useState([]);
-  const checkList = ["Alzheimer's Disease", "Brain Age"];
+  let checkList = [];
+  if (category == "module2") {checkList = ["Alzheimer's Disease risk score + Brain Age prediction"];}
+  else {checkList = ["DLMUSE "]}
+
+  let unavailable = [];
+  if (category == "module2") {unavailable = ["Cardiovascular Disease risk score (coming soon!)", "Diabetes risk score (coming soon!)"]}
 
   // Add/Remove checked item from list
   const handleCheck = (event) => {
@@ -27,6 +32,10 @@ export const ModelSelectionMenu = props => {
   var isChecked = (item) =>
     checked.includes(item) ? "checked-item" : "not-checked-item";
 
+  // Ugly hack to get default checked
+  // TODO: Replace with elegant solution from DDB, which already exists
+  checked += " Alzheimer's Disease risk score + Brain Age prediction ";
+  checked += " DLMUSE "
   return (
     <div className="model-selector">
       <div className="checkList">
@@ -34,14 +43,19 @@ export const ModelSelectionMenu = props => {
         <div className="list-container">
           {checkList.map((item, index) => (
             <div key={index}>
-              <input value={item} type="checkbox" onChange={handleCheck} />
+              <input value={item} type="checkbox" onChange={handleCheck} checked={isChecked(item)} />
               <span className={isChecked(item)}>{item}</span>
             </div>
             
           ))}
-          <div>
-            <p>Additional models will be available soon. Stay tuned!</p>
-          </div>
+          <div className="title">Currently Unavailable:</div>
+          {unavailable.map((item, index) => (
+            <div key={index}>
+              <input value={item} disabled={true} type="checkbox" onChange={handleCheck} />
+              <span className={isChecked(item)}>{item}</span>
+            </div>
+            
+          ))}
         </div>
       </div>
       <br />

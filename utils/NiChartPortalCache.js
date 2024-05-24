@@ -1,5 +1,10 @@
+import { collectCohortsFromRemoteStorage } from '../utils/uploadFiles.js'
+
+//const initial_cohorts = await collectCohortsFromRemoteStorage('cbica-nichart-inputdata');
+//const initial_cohorts = JSON.parse(window.localStorage.getItem("nichart_cohorts"));
 
 let module_0_cache = {};
+let module_0_selected_cohort = "";
 
 let models_cache = {module1: {}, module2: {}};
 
@@ -11,7 +16,7 @@ let use_cached_module1_results = false;
 let use_cached_module2_results = false;
 
 export function modelsAreCached(category) {
-    if (models_cache.category) {
+    if (module_0_cache[category]) {
         return true;
     } else {
         return false;
@@ -32,7 +37,17 @@ export function getModule0Cohorts() {
 }
 
 export function setModule0Cohorts(cohorts_object) {
+    window.localStorage.setItem("nichart_cohorts", JSON.stringify(cohorts_object))
     module_0_cache = cohorts_object;
+}
+
+export function getModule0SelectedCohort() {
+    return module_0_selected_cohort;
+}
+
+export function setModule0SelectedCohort(selected) {
+    module_0_selected_cohort = selected;
+    return;
 }
 
 export function getUseModule1Results() {
