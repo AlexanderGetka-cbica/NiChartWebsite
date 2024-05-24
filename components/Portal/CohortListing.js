@@ -42,6 +42,7 @@ export const CohortListing = ({emitNewSelection, emitCohorts, allowCreation}) =>
         //updateCohorts(items);
         //updateSelection(newItem);
         setModule0Cohorts(items);
+        emitNewSelection(newItem);
       }
       else {
         alert("Invalid cohort identifier: already in use!")

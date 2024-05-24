@@ -10,8 +10,7 @@ import { DefaultStorageManagerExample, getCombinedImageZip, getCombinedCSV, runM
 import { setModule0Cohorts, getModule0Cohorts } from '../../utils/NiChartPortalCache.js'
 import { CohortListing } from './CohortListing.js'
 import { SpareScoresInputStorageManager, SpareScoresDemographicStorageManager, getSpareScoresOutput, emptyBucketForUser,  downloadBlob } from '../../utils/uploadFiles.js'
-import { downloadTemplateDemographics } from './Module_2.js'
-import { createCohort } from '../../utils/uploadFiles.js'
+import { createCohort, downloadTemplateDemographics } from '../../utils/uploadFiles.js'
 
 // Concept: User creates cohorts/datsets, uploads the corresponding files.
 // These files are placed in subdirectories corresponding 
@@ -45,7 +44,7 @@ function Module_0({moduleSelector}) {
 
     const handleCohortsUpdated = (cohorts) => {
         setCohorts(cohorts);
-        saveCohorts(cohorts);
+        setModule0Cohorts(cohorts);
     }
 
     const removeCohort = (cohort) => {
@@ -58,30 +57,30 @@ function Module_0({moduleSelector}) {
         setSelectedCohort("");
     }
 
-    function saveCohorts(arg) {
-        setModule0Cohorts(arg);
-        setCohorts(arg);
-    }
-
     function clearCohorts() {
         setModule0Cohorts({});
         setCohorts({});
     }
+
+    function onUploadDemographicsSuccess() {
+
+    }
+
 
     return (
       <div>
         <Modal
               open={fileBrowserModalOpen}
               handleClose={handleFileBrowserClose}
-              prefix={selectedCohort}
+              
               title="Uploads and Quality Control"
               content="Files you have uploaded are visible here. You can also see some basic status information (including initial QC results) and delete files from the server if desired."
         >
-           <RemoteFileDisplay bucket="cbica-nichart-inputdata" height="75%" />
+           <RemoteFileDisplay bucket="cbica-nichart-inputdata" prefix={selectedCohort} height="75%" />
         </Modal>
         
         <Heading level={1}>Module 0: Data Management</Heading>
-        <Text>Create or delete cohorts and upload associated scans and demographics here. When done, proceed to Module 1.</Text>
+        <Text>Create or delete cohorts and upload associated scans and demographics here. (At least one scan is required for biomarker extraction, and a corresponding demoggraphics CSV is required for running predictions). When done, proceed to Module 1.</Text>
         <div className={styles.moduleContainer}>
             <Divider orientation="horizontal" />
             <Flex direction={{ base: 'column', large: 'row' }} maxWidth="100%" padding="1rem" width="100%" justifyContent="flex-start">
@@ -102,7 +101,7 @@ function Module_0({moduleSelector}) {
                 <CohortListing emitNewSelection={(cohort) => handleNewCohortSelected(cohort)} emitCohorts={(cohorts) => handleCohortsUpdated(cohorts)} allowCreation={true}/>
                 <Divider orientation='horizontal' />
                     <Heading level={3}>Clear Data</Heading>
-                    <Text>You can immediately delete any uploaded data from our servers by using these buttons. <b>This is a destructive action</b>. Otherwise, your data will remain in our cloud storage for a maximum of 36 hours.</Text>
+                    <Text>You can immediately delete any uploaded data from our servers by using these buttons. <b>This is a destructive action</b> that will delete all files you have uploaded. Otherwise, your data will remain in our cloud storage for a maximum of 36 hours.</Text>
                     <Button variation="destructive" loadingText="Emptying..." onClick={async () => emptyBucketForUser('cbica-nichart-inputdata')}>Delete All Input Data</Button>
                 <   Button loadingText="Emptying..." variation="destructive" onClick={async () => emptyBucketForUser('cbica-nichart-outputdata') }>Delete All Output Data</Button>
                 </Flex>
@@ -126,6 +125,7 @@ function Module_0({moduleSelector}) {
                     <Button variation="primary" colorTheme="info" onClick={handleFileBrowserOpen}>Browse Uploads + Check QC</Button> 
                     {/*<DragAndDropUploader prefix={item} />*/}
                     <Heading level={5}>Upload Demographics CSV</Heading>
+                    <Text>You can use the "Download Template CSV" button to see a valid example. We <b>strongly recommend</b> checking your column headers for proper capitalization. Age should be an integer and Sex should be M or F.</Text>
                     <SpareScoresDemographicStorageManager prefix={key}></SpareScoresDemographicStorageManager>
                     <Button loadingText="Downloading..." variation="primary" colorTheme="info" onClick={async () => downloadTemplateDemographics() }>Download Template CSV</Button>
                     <Button variation="destructive" loadingText="Emptying..." onClick={async () => { emptyBucketForUser('cbica-nichart-inputdata', key); removeCohort(key); alert("Cohort data deleted.") }}>Delete Cohort</Button>

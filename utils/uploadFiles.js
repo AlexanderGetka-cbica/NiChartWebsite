@@ -350,7 +350,7 @@ const processFile = async ({ file, key }) => {
     };
 };
 
-export const DefaultStorageManagerExample = () => {
+export const DefaultStorageManagerExample = ({prefix=''}) => {
   let [files, setFiles] = React.useState({});
   
   return (
@@ -358,15 +358,13 @@ export const DefaultStorageManagerExample = () => {
     <StorageManager
       acceptedFileTypes={['.nii.gz', '.nii', '.zip']}
       accessLevel="private"
+      path={prefix+"/"}
       maxFileCount={10}
       shouldAutoProceed={true}
       processFile={processFile}
       displayText={{
         dropFilesText: "Drag and drop NIfTI scans here",
         browseFilesText: "Or browse individual files",
-        getFilesUploadedText(count) {
-          return '${count} '
-        }
       }}
       isResumable
       //onSuccess={onSuccess}
@@ -418,7 +416,7 @@ export const DefaultStorageManagerExample = () => {
           });
         }}*/
       />
-      <ScrollView height="100px">
+      <ScrollView height="10px">
       {Object.keys(files).map((key) => {
         return files[key] ? (
           <div>
@@ -431,7 +429,7 @@ export const DefaultStorageManagerExample = () => {
   );
 };
 
-export const JobList = ({jobQueue}) => {
+export const JobList = ({jobQueue, prefix=''}) => {
   let [jobs, setJobs] = useState({});
   let [currentUsername, setCurrentUsername] = useState('');
   // Create job checkpoint at default 24 hours before (don't show jobs older than this)
@@ -918,9 +916,6 @@ export const SpareScoresInputStorageManager = ({prefix=''}) => {
       displayText={{
         dropFilesText: "Drag and drop module 1 output here",
         browseFilesText: "Or browse individual files",
-        getFilesUploadedText(count) {
-          return '${count} '
-        }
       }}
       //onSuccess={onSuccess}
       onFileRemove={({ key }) => {
@@ -962,7 +957,7 @@ export const SpareScoresInputStorageManager = ({prefix=''}) => {
           });
         }}
       />
-      <ScrollView height="100px">
+      <ScrollView height="10px">
       {Object.keys(files).map((key) => {
         return files[key] ? (
           <div>
@@ -989,9 +984,6 @@ export const SpareScoresDemographicStorageManager = ({prefix=''}) => {
       displayText={{
         dropFilesText: "Drag and drop Demographics CSV here",
         browseFilesText: "Or browse individual files",
-        getFilesUploadedText(count) {
-          return '${count} '
-        }
       }}
       processFile={processFileForSpareScoresDemographics}
       //onSuccess={onSuccess}
@@ -1034,7 +1026,7 @@ export const SpareScoresDemographicStorageManager = ({prefix=''}) => {
           });
         }}
       />
-      <ScrollView height="100px">
+      <ScrollView height="10px">
       {Object.keys(files).map((key) => {
         return files[key] ? (
           <div>

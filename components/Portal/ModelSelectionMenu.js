@@ -48,7 +48,7 @@ export const ModelSelectionMenu = ({category}) => {
             </div>
             
           ))}
-          <div className="title">Currently Unavailable:</div>
+          <div hidden={category == "module1"} className="title">Currently Unavailable:</div>
           {unavailable.map((item, index) => (
             <div key={index}>
               <input value={item} disabled={true} type="checkbox" onChange={handleCheck} />
