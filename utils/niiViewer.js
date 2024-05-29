@@ -3,11 +3,18 @@ import { Niivue, NVImage } from "@niivue/niivue";
 import { Button, Select, MenuItem } from "@mui/material";
 import { getRelevantROIs, generateColormaps } from '/utils/roiColormaps';
 import { downloadOutputFile, downloadInputFile } from "./uploadFiles";
+import { getModule0SelectedCohort } from "./NiChartPortalCache";
 import ROIDict from '../public/content/Portal/Visualization/Dicts/MUSE_ROI_complete_list.json';
 
 const NiiVue = ({ subjectID, roi, closeModal }) => {
-  const input_String = `${subjectID}.nii.gz`;
-  const DLMUSE_String = `${subjectID}_DLMUSE.nii.gz`;
+  const currentCohort = getModule0SelectedCohort();
+  let input_String = `${subjectID}.nii.gz`;
+  let DLMUSE_String = `${subjectID}_DLMUSE.nii.gz`;
+  if (currentCohort) {
+    input_String = `${currentCohort}/${subjectID}.nii.gz`;
+    //DLMUSE_String = `${currentCohort}/${subjectID}_DLMUSE.nii.gz`;
+  }
+
   const canvas = useRef(null);
   const [isError, setIsError] = useState(false);
   const [overlayColor, setOverlayColor] = useState("custom_blue");
