@@ -1049,7 +1049,7 @@ export async function launchSpareScores(prefix='') {
     const payload_in = {'prefix': prefix}
     const command = new InvokeCommand({
          FunctionName: 'cbica-nichart-sparescores-jobprocessor',
-         Payload: JSON.stringify(payload),
+         Payload: JSON.stringify(payload_in),
          LogType: LogType.Tail,
        });
   const { Payload, LogResult } = await client.send(command);
@@ -1063,6 +1063,7 @@ export async function launchSpareScores(prefix='') {
 export async function getSpareScoresOutput(doBrowserDownload, prefix='') {
     try {
       let file_key = "";
+      let output_key = "";
         if (prefix) {
           file_key = prefix + "/" + "sparescores/output.csv";
           output_key = prefix + "_" + "sparescores_output.csv"

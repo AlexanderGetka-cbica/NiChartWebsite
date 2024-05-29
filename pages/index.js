@@ -6,50 +6,48 @@ import Footer from '../components/Layout/Footer';
 import Circle from '../components/Components/Circle'
 import Favicons from '../components/Favicons/Favicons';
 import reportWebVitals from '/utils/reportWebVitals';
-import { Typography }from '@mui/material';
+import { Typography } from '@mui/material';
 import styles from '../styles/index.module.css';
 
 const HomePage = () => {
   const [windowWidth, setWindowWidth] = useState(null);
   const [svgSize, setSvgSize] = useState(225); // Default size
+  const [isVertical, setIsVertical] = useState(false); // Layout state
 
   useEffect(() => {
-    // Function to update the window width
     const updateWindowWidth = () => {
       setWindowWidth(window.innerWidth);
     };
-    // Set the initial width
+
     updateWindowWidth();
+
     const handleResize = () => {
-      if (window.innerWidth < 600) {
-        setSvgSize(150); // Size for extra small devices
-      } else if (window.innerWidth < 1250) {
-        setSvgSize(250); // Size for small devices
-      } else if (window.innerWidth < 1450) {
-        setSvgSize(125); // Size for medium devices
-      } else if (window.innerWidth < 1750) {
-        setSvgSize(150); // Size for large devices
-      } else if (window.innerWidth < 1950) {
-        setSvgSize(175); // Size for largest devices
-      } else if (window.innerWidth < 2150) {
-        setSvgSize(200); // Size for largest devices
-      } 
-      if (window.innerWidth > 2350) {
-        setSvgSize(250); // Size for largest devices
-      } else if (window.innerWidth > 2550) {
-        setSvgSize(275); // Size for largest devices
-      }
+      const minSvgSize = 150;
+      const maxSvgSize = 250;
+      const minWidth = 900;
+      const maxWidth = 2160;
+
+      // Linear interpolation for svgSize
+      const newSize = Math.min(Math.max(
+        minSvgSize + (window.innerWidth - minWidth) * (maxSvgSize - minSvgSize) / (maxWidth - minWidth),
+        minSvgSize
+      ), maxSvgSize);
+
+      setSvgSize(newSize);
+      // Toggle layout based on window width
+      setIsVertical(window.innerWidth < 1250);
     };
 
     window.addEventListener('resize', handleResize);
-    handleResize(); // Initial size setup
+    handleResize();
 
     return () => {
-      window.removeEventListener('resize', updateWindowWidth);
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
   const router = useRouter();
+
   const handleStepCircleClick = (sectionLabel) => {
     const sectionIdMap = {
       'Curate': 'Reference Dataset',
@@ -64,36 +62,32 @@ const HomePage = () => {
       router.push(`/components#${encodeURIComponent(sectionId)}`, undefined, { shallow: true });
     }
   };
-    
-  const semiCircleAngleSpread = 180; // Angle spread for semi-circle (in degrees)
-  const semiCircleRadius = svgSize * 1.7; // Adjust radius based on svgSize
-  const centerPoint = semiCircleRadius; // Center of the semi-circle
+
+  const semiCircleAngleSpread = 180; 
+  const semiCircleRadius = svgSize * 1.8; 
+  const stepCircleDiameter = svgSize;
+  const semiCircleHeight = semiCircleRadius * 2 + stepCircleDiameter * 1.5;
+  const semiCircleWidth = semiCircleRadius * 2 + stepCircleDiameter * 1.5;
+
   const StepCircle = ({ label, imageUrl, onClick, strokeColor, index, total, svgSize }) => {
-    // Calculate the angle for this item
-    const angleDeg = (semiCircleAngleSpread / (total - 1)) * index - (semiCircleAngleSpread / 2) + 180; // Offset by 180 deg so that it's the left semi circle.
+    const angleDeg = (semiCircleAngleSpread / (total - 1)) * index - (semiCircleAngleSpread / 2); 
     const angleRad = (Math.PI / 180) * angleDeg;
-
-    // Convert polar coordinates to Cartesian coordinates
-    const x = centerPoint + semiCircleRadius * Math.cos(angleRad);
-    const y = centerPoint + semiCircleRadius * Math.sin(angleRad);
-
-    // Inline styles for positioning
+    const x = semiCircleRadius * Math.cos(angleRad);
+    const y = semiCircleRadius * Math.sin(angleRad); 
     const style = {
       position: 'absolute',
-      left: `${x}px`,
-      bottom: `${y}px`, // Adjust based on the radius
-      transform: 'translate(-20%, 20%)' // Center the item on the calculated position
+      left: `calc(50% - ${x}px)`,
+      top: `calc(50% + ${y}px)`,
+      transform: 'translate(0%, -50%)'
     };
-
 
     return (
       <div className={styles.stepCircleContainer} style={style}>
-        <Circle label={label} imageUrl={imageUrl} onClick={onClick} strokeColor={strokeColor} svgSize={svgSize}/>
+        <Circle label={label} imageUrl={imageUrl} onClick={onClick} strokeColor={strokeColor} svgSize={svgSize} />
       </div>
     );
   };
 
-  // Usage inside a parent component
   const steps = [
     { label: "Curate", color: "#a11f25", image: "images/Home/curate.png"},
     { label: "Process", color: "#2152ad", image: "images/Home/process.png"},
@@ -101,11 +95,10 @@ const HomePage = () => {
     { label: "Learn", color: "#e9a944", image: "images/Home/learn.png"},
     { label: "Visualize", color: "#f5e852", image: "images/Home/visualize.png"},
     { label: "Deploy", color: "#ac29d8", image: "images/Home/deploy.png"},
-                ];
+  ];
 
   let stepElements;
   if (windowWidth > 1250) {
-    // Semicircle layout
     stepElements = steps.map((step, index) => (
       <StepCircle
         key={step.label}
@@ -118,8 +111,7 @@ const HomePage = () => {
         svgSize={svgSize}
       />
     ));
-  } else {
-    // Vertical list layout
+  } else if (windowWidth > 450) {
     stepElements = steps.map((step) => (
       <Circle
         key={step.label}
@@ -131,7 +123,7 @@ const HomePage = () => {
       />
     ));
   }
-  
+
   return (
     <div className={styles.container}>
       <Head>
@@ -145,27 +137,35 @@ const HomePage = () => {
             <p><a className={styles.title}>NiChart:</a><a className={styles.text}>Neuro Imaging Chart of AI-based Imaging Biomarkers</a></p>
           </div>
           <div>
-            <br></br>
-            <Typography variant='h5'>
-              Want to help shape the future of NiChart? 
+          <br></br><br></br><br></br><br></br><br></br>
+              <p><a className={styles.smallText}>Want to help shape the future of NiChart? </a></p>
               <br></br>
-              <b>Please take our <a href="https://docs.google.com/forms/d/e/1FAIpQLSddH_eg5RHI94Ph7KYAGibzRSVfXOKReGXbj0Z2YBfF_6c8SA/viewform"> 5-minute survey</a>!</b>
-            </Typography>
+              <p><a className={styles.smallText}><b>Please take our <a href="https://docs.google.com/forms/d/e/1FAIpQLSddH_eg5RHI94Ph7KYAGibzRSVfXOKReGXbj0Z2YBfF_6c8SA/viewform">5-minute survey</a>!</b></a></p>
             <br></br>
           </div>
           <div className={styles.studentPhoto}>
-            <img className={styles.infographic} src="/images/Home/NiChart_info_pic_student_no_background.png" alt=""/>
+            <img className={styles.infographic} src="/images/Home/NiChart_info_pic_student_no_background.png" alt="NiChart Infographic"/>
           </div>
         </div>
         <div className={styles.rightSide}>
-        <div className={windowWidth > 1250 ? styles.semiCircleContainer : styles.verticalLayoutContainer}>
-          {windowWidth > 1250 && (
-            <>
-              <img src={"/images/Home/chart.jpg"} alt="NiChart" className={styles.centralImage} />
-            </>
+          {isVertical ? (
+            <div className={styles.verticalLayoutContainer}>
+              {steps.map((step) => (
+                <Circle
+                  key={step.label}
+                  label={step.label}
+                  imageUrl={step.image}
+                  onClick={() => handleStepCircleClick(step.label)}
+                  strokeColor={step.color}
+                  svgSize={svgSize}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className={styles.semiCircleContainer} style={{ height: `${semiCircleHeight}px` }}>
+              {stepElements}
+            </div>
           )}
-          {stepElements}
-          </div>
         </div>
       </div>
       <div className={styles.bottom}>
@@ -173,13 +173,6 @@ const HomePage = () => {
           <div>
             <Typography variant='h5'>A framework to process multi-modal MRI images, harmonize to reference data, apply and contribute machine learning models and derive individualized biomarkers called "Neuroimaging Chart Dimensions"</Typography>
           </div>
-          {/* Removed this ----- TODO: Do we need this language?*/}
-          {/* <div className={styles.bottomTextColumn}>
-            <p>NiChart aims to facilitate large-scale neuroimaging research and the wider use of advanced neuroimage analysis methods by non-experts.</p>
-            <p>User-friendly web application hosted in the AWS cloud enables rapid processing of single scans and large image datasets.</p>
-            <p>Data harmonization and pre-trained machine learning models provide imaging biomarkers (NiChart dimensions) that capture brain changes due to aging and disease.</p>
-            <p>Users can use visualization tools to locate a subject's position within NiChart space in comparison to reference.</p>
-          </div> */}
         </div>
       </div>
       <Footer />
@@ -188,7 +181,6 @@ const HomePage = () => {
 };
 
 export default HomePage;
-
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
