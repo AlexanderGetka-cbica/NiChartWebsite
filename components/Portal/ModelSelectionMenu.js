@@ -5,7 +5,7 @@ export const ModelSelectionMenu = ({category}) => {
   const [checked, setChecked] = useState([]);
   let checkList = [];
   if (category == "module2") {checkList = ["Alzheimer's Disease risk score + Brain Age prediction"];}
-  else {checkList = ["DLMUSE "]}
+  else {checkList = ["DLMUSE (spatial volumes of anatomical regions)"]}
 
   let unavailable = [];
   if (category == "module2") {unavailable = ["Cardiovascular Disease risk score (coming soon!)", "Diabetes risk score (coming soon!)"]}

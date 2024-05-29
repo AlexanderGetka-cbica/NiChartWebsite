@@ -90,7 +90,7 @@ function Module_1({moduleSelector}) {
       
 
       <Heading level={1}>Module 1: Image Processing</Heading>
-      <p>Select a cohort, select an image processing model to extract features, then click "submit jobs" to start. When done, export your results to module 2 or download them directly.</p>
+      <p>Select a cohort, select an image processing model to extract biomarkers, then click "Submit Jobs" to start. Please be advised that jobs may take up to 6 minutes to begin running and should finish within 1 minute after reaching the "RUNNING" phase. When done, you may export your results to module 2 or download them directly.</p>
       <div className={styles.moduleContainer}>
           <Divider orientation="horizontal" />
           <Flex direction={{ base: 'column', large: 'row' }} maxWidth="100%" padding="1rem" width="100%" justifyContent="flex-start">
@@ -117,14 +117,14 @@ function Module_1({moduleSelector}) {
               <Divider orientation="vertical" /> 
               <Flex direction="column" width="33%">
                   <Heading level={3}>Jobs in Progress</Heading>
+                  <Text>Biomarker extraction jobs that have been submitted will appear here. Please wait for them to finish before proceeding. Successful jobs will be marked with a green smiley . If your job fails, please contact us and provide the job ID listed below.</Text>
                   <JobList jobQueue="cbica-nichart-helloworld-jobqueue2"/>
                   <Button variation="primary" loadingText="Re-submitting..." onClick={async () => await resubmitModule1Jobs(selectedCohort)}>Re-submit Incomplete Jobs</Button>
-                  <p>Jobs will appear here a few seconds after submission. Each job corresponds to one scan. Finished jobs will be marked SUCCEEDED. Please wait for jobs to finish before proceeding. If your job fails, please contact us and provide the job ID listed below.</p>
-                  <p>The first set of scans may take up to 6 minutes to start (time spent in both RUNNABLE and STARTING phases). After this spin-up period, jobs (up to 48 concurrently) should take approximately 1 minute to finish .</p>
+        
               </Flex>
               <Divider orientation="vertical" />
               <Flex direction="column" width="33%">
-                  <Heading level={3}>Download Results</Heading>
+                  <Heading level={3}>Results</Heading>
                   <Text>Results will be downloaded for all scans that have finished processing (those marked green on the job list). All other scans will continue running but will not be included unless you re-download after they complete. In addition to downloads, you can also directly export your results to the next module.</Text>
                   <br></br><br></br><br></br><br></br><br></br><br></br><br></br>
                   <Button loadingText="Downloading CSV..." variation="primary" onClick={async () => await getCombinedCSV(true) } >Download MUSE CSV</Button>

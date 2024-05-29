@@ -7,7 +7,7 @@ import { Flex, Heading, Divider, Text, Collection } from '@aws-amplify/ui-react'
 import styles from '../../styles/Portal_Module_1.module.css'
 import { DragAndDropUploader, TestUpload } from './DragAndDropUploader.js';
 import { DefaultStorageManagerExample, getCombinedImageZip, getCombinedCSV, runModule1Jobs, resubmitModule1Jobs, uploadToModule2 } from '../../utils/uploadFiles.js'
-import { setModule0Cohorts, getModule0Cohorts } from '../../utils/NiChartPortalCache.js'
+import { setModule0Cohorts, getModule0Cohorts, getModule0SelectedCohort } from '../../utils/NiChartPortalCache.js'
 import { CohortListing } from './CohortListing.js'
 import { SpareScoresInputStorageManager, SpareScoresDemographicStorageManager, getSpareScoresOutput, emptyBucketForUser,  downloadBlob } from '../../utils/uploadFiles.js'
 import { createCohort, downloadTemplateDemographics } from '../../utils/uploadFiles.js'
@@ -36,7 +36,7 @@ function Module_0({moduleSelector}) {
     const handleFileBrowserClose = () => setFileBrowserModalOpen(false);
       
     const [cohorts, setCohorts] = useState(getModule0Cohorts());
-    const [selectedCohort, setSelectedCohort] = useState("");
+    const [selectedCohort, setSelectedCohort] = useState(getModule0SelectedCohort());
 
     const handleNewCohortSelected = (cohort) => {
         setSelectedCohort(cohort);
@@ -80,7 +80,7 @@ function Module_0({moduleSelector}) {
         </Modal>
         
         <Heading level={1}>Module 0: Data Management</Heading>
-        <Text>Create or delete cohorts and upload associated scans and demographics here. (At least one scan is required for biomarker extraction, and a corresponding demoggraphics CSV is required for running predictions). When done, proceed to Module 1.</Text>
+        <Text>Create or delete cohorts and upload associated scans and demographics here. At least one scan is required for biomarker extraction in module 1, and a corresponding demographics CSV is required for running predictions in module 2. You can browse your uploads for a given cohort (and view quality check results) with the "Browse Uploads + Check QC" button. When you are satisfied with your data, proceed to Module 1 using the navigation bar on the left.</Text>
         <div className={styles.moduleContainer}>
             <Divider orientation="horizontal" />
             <Flex direction={{ base: 'column', large: 'row' }} maxWidth="100%" padding="1rem" width="100%" justifyContent="flex-start">
@@ -97,11 +97,11 @@ function Module_0({moduleSelector}) {
                 
                 <Flex justifyContent="flex-start" direction="column" width="50%">
                 <Heading level={3}>Manage Cohorts</Heading>
-                <Text>Click to select a cohort and upload both scans and demographics CSV to the right. (You can use the "download CSV template" button to see a valid example). When you see both checkmarks, your cohort is ready for processing.</Text>
+                <Text>Click to select a cohort and upload both scans and demographics CSV to the right.</Text>
                 <CohortListing emitNewSelection={(cohort) => handleNewCohortSelected(cohort)} emitCohorts={(cohorts) => handleCohortsUpdated(cohorts)} allowCreation={true}/>
                 <Divider orientation='horizontal' />
                     <Heading level={3}>Clear Data</Heading>
-                    <Text>You can immediately delete any uploaded data from our servers by using these buttons. <b>This is a destructive action</b> that will delete all files you have uploaded. Otherwise, your data will remain in our cloud storage for a maximum of 36 hours.</Text>
+                    <Text>You can immediately delete any uploaded data from our servers by using these buttons. <b>WARNING: This is a destructive action</b> that will delete <b>all</b> files you have uploaded. Otherwise, your data will remain in our cloud storage for a maximum of 36 hours. Cohorts will remain (empty) unless individually deleted.</Text>
                     <Button variation="destructive" loadingText="Emptying..." onClick={async () => emptyBucketForUser('cbica-nichart-inputdata')}>Delete All Input Data</Button>
                 <   Button loadingText="Emptying..." variation="destructive" onClick={async () => emptyBucketForUser('cbica-nichart-outputdata') }>Delete All Output Data</Button>
                 </Flex>
@@ -121,11 +121,12 @@ function Module_0({moduleSelector}) {
                     <Flex direction={{ base: 'column' }} width="100%" justifyContent="flex-start">
                     <Heading level={3}>Selected cohort: {key}</Heading>
                     <Heading level={5}>Upload Input T1 Scans</Heading>
+                    <Text>Upload T1-weighted NIfTI-format (.nii.gz, .nii) brain scans. If uploading multiple scans we <b>highly recommend</b> putting your scans into a .zip archive and uploading that instead. Our system handles this automatically.</Text>
                     <DefaultStorageManagerExample prefix={key}/>
                     <Button variation="primary" colorTheme="info" onClick={handleFileBrowserOpen}>Browse Uploads + Check QC</Button> 
                     {/*<DragAndDropUploader prefix={item} />*/}
                     <Heading level={5}>Upload Demographics CSV</Heading>
-                    <Text>You can use the "Download Template CSV" button to see a valid example. We <b>strongly recommend</b> checking your column headers for proper capitalization. Age should be an integer and Sex should be M or F.</Text>
+                    <Text>You can use the "Download Template CSV" button to see a valid example. We <b>strongly recommend</b> checking your column headers for proper capitalization. Age should be an integer and Sex should be M or F. To replace your demographics file, simply upload another. The previous will be deleted.</Text>
                     <SpareScoresDemographicStorageManager prefix={key}></SpareScoresDemographicStorageManager>
                     <Button loadingText="Downloading..." variation="primary" colorTheme="info" onClick={async () => downloadTemplateDemographics() }>Download Template CSV</Button>
                     <Button variation="destructive" loadingText="Emptying..." onClick={async () => { emptyBucketForUser('cbica-nichart-inputdata', key); removeCohort(key); alert("Cohort data deleted.") }}>Delete Cohort</Button>

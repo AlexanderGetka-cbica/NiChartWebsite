@@ -42,9 +42,7 @@ function Portal() {
             {selectedModule === 'module2' && <Module_2 moduleSelector={handleModuleSelection} />}
             {selectedModule === 'module3' && <Module_3 moduleSelector={handleModuleSelection} />}
             <div>
-              <h4> By using NiChart Cloud, you agree to share your uploaded image data with the University of Pennsylvania for processing only. You are responsible for ensuring your uploads are in compliance with your organization's data policies. Please see the <a href="/about" >About page</a> for more details. All data is deleted from our cloud storage after a maximum of 36 hours. </h4>
-              To use, drop files into the box on the left. When results are available, click to download.
-              Jobs may take up to 6 minutes to start depending on resource availability and other conditions. 
+              <h4> By using NiChart Cloud, you agree to share your uploaded image data with the University of Pennsylvania for processing only. You are responsible for ensuring your activities on this site, including but not limited to data uploads, are in compliance with your organization's data policies. Please see the <a href="/about" >About page</a> for more details. All data is deleted from our cloud storage after a maximum period of 36 hours after creation. </h4>
             </div>
         </div>
       </div> 
